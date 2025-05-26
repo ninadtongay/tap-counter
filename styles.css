@@ -303,3 +303,83 @@ h1 {
     50% { transform: scale(1.05); }
     100% { transform: scale(1); }
 }
+
+@media screen and (max-width: 480px) {
+    .container {
+        padding: 1rem;
+        width: 95%;
+        gap: 1rem;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    .mode-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .counter-display {
+        font-size: 4rem;
+        min-height: 100px;
+    }
+
+    #tap-button {
+        width: 160px;
+        height: 160px;
+        font-size: 1.5rem;
+    }
+
+    .mode-selector {
+        gap: 0.4rem;
+    }
+
+    .input-section input {
+        padding: 0.6rem 1rem;
+        font-size: 1rem;
+    }
+
+    .preset-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+    }
+
+    .timer-display {
+        font-size: 1.1rem;
+    }
+
+    #reset-btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+    }
+
+    .sound-toggle {
+        top: 1rem;
+        right: 1rem;
+        width: 35px;
+        height: 35px;
+    }
+
+    .input-section input {
+        -webkit-appearance: none;
+        appearance: none;
+        font-size: 16px; /* Prevents iOS zoom on focus */
+        padding: 12px;
+        margin: 2px 0;
+        border-radius: var(--border-radius);
+        background-color: var(--background-color);
+    }
+
+    .input-section input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        background-color: white;
+    }
+
+    /* Improve touch target size for preset buttons */
+    .preset-btn {
+        min-height: 44px;
+        min-width: 60px;
+    }
+}

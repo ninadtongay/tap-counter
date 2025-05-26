@@ -79,7 +79,7 @@ function createBeep() {
 
     // Prevent zoom events
     document.addEventListener('touchmove', function(e) {
-        if (e.scale !== 1) {
+        if (e.target.tagName !== 'INPUT' && e.scale !== 1) {
             preventDefault(e);
         }
     }, { passive: false });
@@ -87,16 +87,18 @@ function createBeep() {
     // Prevent zoom on double tap
     let lastTouchEnd = 0;
     document.addEventListener('touchend', function(e) {
-        const now = Date.now();
-        if (now - lastTouchEnd <= 300) {
-            preventDefault(e);
+        if (e.target.tagName !== 'INPUT') {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                preventDefault(e);
+            }
+            lastTouchEnd = now;
         }
-        lastTouchEnd = now;
     }, false);
 
     // Prevent zoom on double tap and pinch
     document.addEventListener('touchstart', function(e) {
-        if (e.touches.length > 1) {
+        if (e.target.tagName !== 'INPUT' && e.touches.length > 1) {
             preventDefault(e);
         }
     }, { passive: false });
@@ -110,13 +112,32 @@ function createBeep() {
         }
     });
 
-    // Prevent selection events except on inputs
+    // Handle input fields separately
     const selectionEvents = ['selectstart', 'mousedown', 'mouseup', 'contextmenu'];
     selectionEvents.forEach(event => {
         document.addEventListener(event, (e) => {
             if (e.target.tagName !== 'INPUT') {
                 preventDefault(e);
             }
+        });
+    });
+
+    // Enable proper input field behavior
+    const inputs = document.querySelectorAll('input[type="number"]');
+    inputs.forEach(input => {
+        // Allow touch events on input fields
+        input.addEventListener('touchstart', (e) => e.stopPropagation());
+        input.addEventListener('touchend', (e) => e.stopPropagation());
+        input.addEventListener('touchmove', (e) => e.stopPropagation());
+        
+        // Improve number input handling
+        input.addEventListener('focus', () => {
+            // Add some padding to prevent viewport shift
+            document.body.style.height = window.innerHeight + 'px';
+        });
+        
+        input.addEventListener('blur', () => {
+            document.body.style.height = '100%';
         });
     });
 
@@ -281,18 +302,30 @@ startNumberInput.addEventListener('input', () => {
     }
 });
 
-// Handle tap button
-tapButton.addEventListener('click', () => {
+// Handle tap button events
+tapButton.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     handleTap();
 });
 
-// Handle touch events for mobile
-tapButton.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    handleTap();
+// Fallback for non-touch devices
+tapButton.addEventListener('click', (e) => {
+    if (!('ontouchstart' in window)) {
+        handleTap();
+    }
 });
+
+let lastTapTime = 0;
+const TAP_DELAY = 100; // Minimum delay between taps
 
 function handleTap() {
+    const currentTime = Date.now();
+    if (currentTime - lastTapTime < TAP_DELAY) {
+        return; // Prevent multiple rapid taps
+    }
+    lastTapTime = currentTime;
+
     // Start timer on first tap
     startTimer();
 
@@ -368,5 +401,30 @@ function initializeUI() {
     updateDisplay();
 }
 
+// Add touch event handlers to all buttons
+function addTouchHandlers() {
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach(button => {
+        button.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            button.style.transform = 'scale(0.95)';
+        });
+
+        button.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            button.style.transform = '';
+            button.click(); // Trigger the click event
+        });
+
+        button.addEventListener('touchcancel', (e) => {
+            e.preventDefault();
+            button.style.transform = '';
+        });
+    });
+}
+
 // Call initialization when the DOM is loaded
-document.addEventListener('DOMContentLoaded', initializeUI);
+document.addEventListener('DOMContentLoaded', () => {
+    initializeUI();
+    addTouchHandlers();
+});

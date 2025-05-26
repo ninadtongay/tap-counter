@@ -15,24 +15,50 @@
             <button class="mode-btn" data-mode="limit">Limit Mode</button>
             <button class="mode-btn" data-mode="descending">Descending Mode</button>
         </div>
+
         <div class="input-section">
             <div id="limit-input" class="hidden">
-                <input type="number" id="max-limit" placeholder="Enter max limit">
+                <div class="input-group">
+                    <input type="number" id="max-limit" placeholder="Enter max limit">
+                    <div class="preset-buttons">
+                        <button class="preset-btn" data-value="108">108</button>
+                        <button class="preset-btn" data-value="1188">1188</button>
+                    </div>
+                </div>
             </div>
             <div id="descending-input" class="hidden">
-                <input type="number" id="start-number" placeholder="Enter starting number">
+                <div class="input-group">
+                    <input type="number" id="start-number" placeholder="Enter starting number">
+                    <div class="preset-buttons">
+                        <button class="preset-btn" data-value="108">108</button>
+                        <button class="preset-btn" data-value="1188">1188</button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="counter-display">
-            <span id="count">0</span>
+        <div class="displays">
+            <div class="timer-display">
+                <span id="timer">00:00</span>
+            </div>
+            <div class="counter-display">
+                <span id="count">0</span>
+            </div>
         </div>
 
         <div class="tap-area">
             <button id="tap-button">TAP</button>
         </div>
 
-        <button id="reset-btn">Reset</button>
+        <div class="controls">
+            <button id="reset-btn">Reset</button>
+        </div>
+
+        <button id="sound-toggle" class="sound-toggle" aria-label="Toggle Sound">
+            <svg class="sound-icon" viewBox="0 0 24 24">
+                <path class="sound-wave" d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z"/>
+            </svg>
+        </button>
     </div>
     <script src="script.js"></script>
 </body>

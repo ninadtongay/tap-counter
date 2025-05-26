@@ -1,6 +1,8 @@
 let count = 0;
 let maxLimit = Infinity;
 let currentMode = 'free';
+let timerInterval = null;
+let startTime = null;
 
 const countDisplay = document.getElementById('count');
 const tapButton = document.getElementById('tap-button');
@@ -14,8 +16,53 @@ const startNumberInput = document.getElementById('start-number');
 // Check if the browser supports vibration
 const canVibrate = 'vibrate' in navigator;
 
-// Initialize audio for the beep sound
-const audio = new Audio('data:audio/wav;base64,//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLWfkWgAI0wWs/ItAAAGDgYtAgAyN+QWaAAihwMWm4G8QQRDiMcCBcH3Cc+CDv/7xA4Tvh9Rz/y8QADBwMWgQAZG/ILNAARQ4GLTcDeIIIhxGOBAuD7hOfBB3/94gcJ3w+o5/5eIAIAAAVwWgQAVQ2ORaIQwEMAJiDg95G4nQL7mQVWI6GwRcfsZAcsKkJvxgxEjzFUgfHoSQ9Qq7KNwqHwuB13MA4a1q/DmBrHgPcmjiGoh//EwC5nGPEmS4RcfkVKOhJf+WOgoxJclFz3kgn//dBA+ya1GhurNn8zb//9NNutNuhz31f////9vt///z+IdAEAAAK4LQIAKobHItEIYCGAExBwe8jcToF9zIKrEdDYIuP2MgOWFSE34wYiR5iqQPj0JIeoVdlG4VD4XA67mAcNa1fhzA1jwHuTRxDUQ//iYBczjHiTJcIuPyKlHQkv/LHQUYkuSi57yQT//uggfZNajQ3Vmz+Zt//+mm3Wm3Q576v////+32///5/EOgAAADVghQAAAAA==');
+// Initialize audio context and sound settings
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+const audioContext = new AudioContext();
+let isSoundEnabled = true; // Track sound enabled state
+
+// Get sound toggle element
+const soundToggle = document.getElementById('sound-toggle');
+
+// Initialize sound preference from localStorage or default to true
+isSoundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+updateSoundToggleState();
+
+// Handle sound toggle clicks
+soundToggle.addEventListener('click', () => {
+    isSoundEnabled = !isSoundEnabled;
+    localStorage.setItem('soundEnabled', isSoundEnabled);
+    updateSoundToggleState();
+});
+
+function updateSoundToggleState() {
+    soundToggle.classList.toggle('muted', !isSoundEnabled);
+    soundToggle.setAttribute('aria-label', isSoundEnabled ? 'Mute Sound' : 'Unmute Sound');
+}
+
+function createBeep() {
+    // Create two oscillators for a pleasant chord
+    const oscillator1 = audioContext.createOscillator();
+    const oscillator2 = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator1.connect(gainNode);
+    oscillator2.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // Use sine waves for a smooth sound
+    oscillator1.type = 'sine';
+    oscillator2.type = 'sine';
+    
+    // Set frequencies to create a pleasant major chord (C5 and E5)
+    oscillator1.frequency.value = 523.25; // C5
+    oscillator2.frequency.value = 659.25; // E5
+    
+    // Start with a lower volume
+    gainNode.gain.value = 0.2;
+    
+    return { oscillator1, oscillator2, gainNode };
+}
 
 // Comprehensive interaction prevention
 (function() {
@@ -54,18 +101,23 @@ const audio = new Audio('data:audio/wav;base64,//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLW
         }
     }, { passive: false });
 
-    // Prevent zoom on keyboard focus
+    // Allow input fields to work
     document.addEventListener('focusin', function(e) {
-        if (e.target.tagName === 'INPUT') {
+        // Don't prevent input field focus
+        if (e.target.tagName !== 'INPUT') {
             e.preventDefault();
             e.target.blur();
         }
     });
 
-    // Prevent selection events
+    // Prevent selection events except on inputs
     const selectionEvents = ['selectstart', 'mousedown', 'mouseup', 'contextmenu'];
     selectionEvents.forEach(event => {
-        document.addEventListener(event, preventDefault);
+        document.addEventListener(event, (e) => {
+            if (e.target.tagName !== 'INPUT') {
+                preventDefault(e);
+            }
+        });
     });
 
     // Prevent double tap zoom
@@ -113,6 +165,37 @@ const audio = new Audio('data:audio/wav;base64,//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLW
 
 function updateDisplay() {
     countDisplay.textContent = count;
+    // Add and remove animation class
+    countDisplay.classList.add('animate');
+    setTimeout(() => countDisplay.classList.remove('animate'), 200);
+}
+
+function updateTimer() {
+    if (!startTime) return;
+    
+    const now = Date.now();
+    const elapsed = Math.floor((now - startTime) / 1000); // Convert to seconds
+    const minutes = Math.floor(elapsed / 60);
+    const seconds = elapsed % 60;
+    
+    document.getElementById('timer').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function startTimer() {
+    if (!startTime) {
+        startTime = Date.now();
+        timerInterval = setInterval(updateTimer, 1000);
+    }
+}
+
+function resetTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+    startTime = null;
+    document.getElementById('timer').textContent = '00:00';
 }
 
 function reset() {
@@ -121,15 +204,34 @@ function reset() {
     updateDisplay();
     maxLimitInput.value = '';
     startNumberInput.value = '';
+    resetTimer();
 }
 
 function notifyLimit() {
+    // Play pleasant sound if enabled
+    if (isSoundEnabled) {
+        const { oscillator1, oscillator2, gainNode } = createBeep();
+        const now = audioContext.currentTime;
+        
+        // Start both oscillators
+        oscillator1.start();
+        oscillator2.start();
+        
+        // Create a smooth fade out
+        gainNode.gain.setValueAtTime(0.2, now);
+        gainNode.gain.linearRampToValueAtTime(0, now + 2);
+        
+        // Stop after 2 seconds and clean up
+        setTimeout(() => {
+            oscillator1.stop();
+            oscillator2.stop();
+            gainNode.disconnect();
+        }, 2000);
+    }
+    
+    // Also vibrate if supported
     if (canVibrate) {
         navigator.vibrate(200);
-    } else {
-        // Play a beep sound if vibration is not supported
-        audio.currentTime = 0; // Rewind to the start
-        audio.play();
     }
 }
 
@@ -142,27 +244,40 @@ modeBtns.forEach(btn => {
         btn.classList.add('active');
         currentMode = btn.dataset.mode;
         
-        // Reset counter when changing modes
-        reset();
+        // Hide all input fields first
+        limitInput.classList.add('hidden');
+        descendingInput.classList.add('hidden');
         
-        // Show/hide appropriate input fields
-        limitInput.classList.toggle('hidden', currentMode !== 'limit');
-        descendingInput.classList.toggle('hidden', currentMode !== 'descending');
+        // Show appropriate input field based on mode
+        if (currentMode === 'limit') {
+            limitInput.classList.remove('hidden');
+        } else if (currentMode === 'descending') {
+            descendingInput.classList.remove('hidden');
+        }
+        
+        // Reset counter and inputs when changing modes
+        reset();
     });
 });
 
 // Handle max limit input
-maxLimitInput.addEventListener('change', () => {
-    maxLimit = parseInt(maxLimitInput.value) || Infinity;
-    count = Math.min(count, maxLimit);
-    updateDisplay();
+maxLimitInput.addEventListener('input', () => {
+    const value = parseInt(maxLimitInput.value);
+    if (!isNaN(value) && value > 0) {
+        maxLimit = value;
+        count = Math.min(count, maxLimit);
+        updateDisplay();
+    }
 });
 
 // Handle starting number input for descending mode
-startNumberInput.addEventListener('change', () => {
+startNumberInput.addEventListener('input', () => {
     if (currentMode === 'descending') {
-        count = parseInt(startNumberInput.value) || 0;
-        updateDisplay();
+        const value = parseInt(startNumberInput.value);
+        if (!isNaN(value) && value >= 0) {
+            count = value;
+            updateDisplay();
+        }
     }
 });
 
@@ -178,6 +293,9 @@ tapButton.addEventListener('touchend', (e) => {
 });
 
 function handleTap() {
+    // Start timer on first tap
+    startTimer();
+
     switch (currentMode) {
         case 'free':
             count++;
@@ -187,6 +305,10 @@ function handleTap() {
                 count++;
                 if (count >= maxLimit) {
                     notifyLimit();
+                    if (timerInterval) {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                    }
                 }
             }
             break;
@@ -195,6 +317,10 @@ function handleTap() {
                 count--;
                 if (count === 0) {
                     notifyLimit();
+                    if (timerInterval) {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                    }
                 }
             }
             break;
@@ -210,5 +336,37 @@ function handleTap() {
 // Handle reset button
 resetButton.addEventListener('click', reset);
 
+// Handle preset buttons
+document.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const value = parseInt(btn.dataset.value);
+        if (currentMode === 'limit') {
+            maxLimitInput.value = value;
+            maxLimit = value;
+        } else if (currentMode === 'descending') {
+            startNumberInput.value = value;
+            count = value;
+        }
+        updateDisplay();
+    });
+});
+
 // Initialize display
 updateDisplay();
+
+// Initialize mode buttons and input fields
+function initializeUI() {
+    // Set Free Mode as active by default
+    const freeModeBtn = document.querySelector('[data-mode="free"]');
+    freeModeBtn.classList.add('active');
+    
+    // Hide input fields by default
+    limitInput.classList.add('hidden');
+    descendingInput.classList.add('hidden');
+    
+    // Initialize the counter display
+    updateDisplay();
+}
+
+// Call initialization when the DOM is loaded
+document.addEventListener('DOMContentLoaded', initializeUI);

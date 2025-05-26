@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tap Counter</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Tap Counter</h1>
+        
+        <div class="mode-selector">
+            <button class="mode-btn active" data-mode="free">Free Mode</button>
+            <button class="mode-btn" data-mode="limit">Limit Mode</button>
+            <button class="mode-btn" data-mode="descending">Descending Mode</button>
+        </div>
+
+        <div class="input-section">
+            <div id="limit-input" class="hidden">
+                <input type="number" id="max-limit" placeholder="Enter max limit">
+            </div>
+            <div id="descending-input" class="hidden">
+                <input type="number" id="start-number" placeholder="Enter starting number">
+            </div>
+        </div>
+
+        <div class="counter-display">
+            <span id="count">0</span>
+        </div>
+
+        <div class="tap-area">
+            <button id="tap-button">TAP</button>
+        </div>
+
+        <button id="reset-btn">Reset</button>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

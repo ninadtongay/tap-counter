@@ -5,7 +5,6 @@ let timerInterval = null;
 let startTime = null;
 
 const countDisplay = document.getElementById('count');
-const tapButton = document.getElementById('tap-button');
 const resetButton = document.getElementById('reset-btn');
 const modeBtns = document.querySelectorAll('.mode-btn');
 const limitInput = document.getElementById('limit-input');
@@ -204,7 +203,15 @@ function updateTimer() {
 }
 
 function startTimer() {
-    if (!startTime) {
+    // Only start timer if:
+    // 1. In free mode, or
+    // 2. In limit mode with a valid limit, or
+    // 3. In descending mode with a valid starting number
+    if (!startTime && (
+        currentMode === 'free' ||
+        (currentMode === 'limit' && maxLimit > 0) ||
+        (currentMode === 'descending' && count > 0)
+    )) {
         startTime = Date.now();
         timerInterval = setInterval(updateTimer, 1000);
     }
@@ -302,17 +309,37 @@ startNumberInput.addEventListener('input', () => {
     }
 });
 
-// Handle tap button events
-tapButton.addEventListener('touchstart', (e) => {
+const tapZone = document.getElementById('tap-zone');
+const tapHint = document.querySelector('.tap-hint');
+
+// Handle tap zone events
+tapZone.addEventListener('touchstart', (e) => {
     e.preventDefault();
     e.stopPropagation();
+    tapZone.style.transform = 'scale(0.98)';
+    tapZone.style.backgroundColor = 'var(--hover-color)';
     handleTap();
 });
 
+tapZone.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    tapZone.style.transform = '';
+    tapZone.style.backgroundColor = '';
+});
+
 // Fallback for non-touch devices
-tapButton.addEventListener('click', (e) => {
+tapZone.addEventListener('mousedown', (e) => {
     if (!('ontouchstart' in window)) {
+        tapZone.style.transform = 'scale(0.98)';
+        tapZone.style.backgroundColor = 'var(--hover-color)';
         handleTap();
+    }
+});
+
+tapZone.addEventListener('mouseup', (e) => {
+    if (!('ontouchstart' in window)) {
+        tapZone.style.transform = '';
+        tapZone.style.backgroundColor = '';
     }
 });
 

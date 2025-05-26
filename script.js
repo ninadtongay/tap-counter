@@ -221,7 +221,7 @@ function resetTimer() {
 
 function reset() {
     count = 0;
-    maxLimit = Infinity;
+    maxLimit = currentMode === 'limit' ? 0 : Infinity;
     updateDisplay();
     maxLimitInput.value = '';
     startNumberInput.value = '';
@@ -334,6 +334,10 @@ function handleTap() {
             count++;
             break;
         case 'limit':
+            if (maxLimit === Infinity) {
+                // Don't allow counting if no limit is set
+                return;
+            }
             if (count < maxLimit) {
                 count++;
                 if (count >= maxLimit) {

@@ -66,15 +66,14 @@ body {
     width: 95%;
     max-width: 500px;
     margin: auto;
-    padding: 1.5rem 0.5rem 1rem;
+    padding: max(1.5rem, env(safe-area-inset-top)) 0.5rem 1rem;
     background: white;
     border-radius: var(--border-radius);
     box-shadow: 0 8px 30px var(--shadow-color);
     text-align: center;
     display: flex;
     flex-direction: column;
-    height: 95vh;
-    max-height: 95vh;
+    height: min(95vh, calc(100vh - max(2rem, env(safe-area-inset-top)) - max(1rem, env(safe-area-inset-bottom))));
     gap: 0.75rem;
     overflow: hidden;
 }
@@ -82,8 +81,9 @@ body {
 h1 {
     color: var(--text-color);
     font-weight: 600;
-    font-size: 2rem;
+    font-size: clamp(1.25rem, 4vw, 2rem);
     letter-spacing: -0.5px;
+    margin-top: max(0.5rem, env(safe-area-inset-top));
 }
 
 .mode-selector {
@@ -160,7 +160,7 @@ h1 {
 }
 
 .timer-display {
-    font-size: 1.3rem;
+    font-size: clamp(1rem, 3vw, 1.3rem);
     color: white;
     font-weight: 500;
     font-family: 'SF Mono', 'Courier New', monospace;
@@ -169,7 +169,7 @@ h1 {
 }
 
 .counter-display {
-    font-size: 8rem;
+    font-size: clamp(8rem, 15vw, 8rem);
     font-weight: 700;
     color: white;
     transition: transform 0.2s ease;
@@ -192,6 +192,7 @@ h1 {
     width: 100%;
     margin: 0;
     padding: 0 0.5rem;
+    min-height: 0; /* Allow tap area to shrink if needed */
 }
 
 #tap-zone {
@@ -206,13 +207,14 @@ h1 {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 1rem;
+    gap: 0.5rem;
     position: relative;
     user-select: none;
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
     margin: 0.25rem 0;
-    padding: 1.5rem 0;
+    padding: clamp(1rem, 3vh, 2rem) 0;
+    min-height: min(150px, 25vh);
 }
 
 .tap-hint {
@@ -237,12 +239,12 @@ h1 {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 0.5rem 0;
-    padding-bottom: 0;
+    margin: 0.8rem 0;
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
 }
 
 #reset-btn {
-    padding: 0.7rem 1.5rem;
+    padding: clamp(0.5rem, 2vw, 0.7rem) clamp(1rem, 3vw, 1.5rem);
     border: none;
     border-radius: 12px;
     background: var(--background-color);
@@ -259,10 +261,10 @@ h1 {
 
 .sound-toggle {
     position: fixed;
-    top: 1rem;
-    right: 1rem;
-    width: 40px;
-    height: 40px;
+    top: max(1rem, env(safe-area-inset-top));
+    right: max(1rem, env(safe-area-inset-right));
+    width: clamp(36px, 8vw, 40px);
+    height: clamp(36px, 8vw, 40px);
     border: none;
     border-radius: 50%;
     background: white;
@@ -337,88 +339,53 @@ h1 {
     .container {
         width: 100%;
         height: 100vh;
-        max-height: 100vh;
+        height: 100dvh; /* Use dynamic viewport height when available */
         border-radius: 0;
-        padding: calc(env(safe-area-inset-top) + 1rem) 0.5rem calc(env(safe-area-inset-bottom) + 0.5rem);
+        padding: max(1rem, env(safe-area-inset-top)) 
+                max(0.5rem, env(safe-area-inset-right))
+                max(0.5rem, env(safe-area-inset-bottom))
+                max(0.5rem, env(safe-area-inset-left));
         gap: 0.5rem;
         margin: 0;
     }
 
-    h1 {
-        font-size: 1.25rem;
-        margin: 0.5rem 0;
-        padding-top: env(safe-area-inset-top);
-    }
-
     .mode-selector {
         gap: 0.4rem;
+        padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left);
     }
 
     .mode-btn {
         padding: 0.5rem 0.8rem;
-        font-size: 0.9rem;
+        font-size: min(0.9rem, 3.5vw);
     }
 
     .input-section {
-        padding: 0.25rem 0;
-    }
-
-    .input-group {
-        gap: 0.5rem;
-    }
-
-    .displays {
-        gap: 0.25rem;
-        margin: 0.5rem 0;
-    }
-
-    .counter-display {
-        font-size: 6rem;
-    }
-
-    .timer-display {
-        font-size: 1.1rem;
+        padding: 0.25rem max(0.5rem, env(safe-area-inset-right)) 0.25rem max(0.5rem, env(safe-area-inset-left));
     }
 
     .tap-area {
-        padding: 0 0.25rem;
+        padding: 0 max(0.25rem, env(safe-area-inset-right)) 0 max(0.25rem, env(safe-area-inset-left));
     }
 
     #tap-zone {
-        padding: 1rem 0;
-        margin: 0.25rem 0;
-        min-height: 120px;
-    }
-
-    .controls {
-        margin: 0.75rem 0;
-        padding-bottom: env(safe-area-inset-bottom);
-    }
-
-    #reset-btn {
-        padding: 0.5rem 1rem;
-        font-size: 0.9rem;
+        min-height: min(120px, 20vh);
+        padding: clamp(0.5rem, 2vh, 1rem) 0;
     }
 
     .preset-buttons {
-        gap: 0.5rem;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+        padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left);
     }
 
     .preset-btn {
         padding: 0.4rem 0.8rem;
-        font-size: 0.85rem;
-        min-height: 36px;
+        font-size: min(0.85rem, 3.5vw);
+        min-height: 32px;
     }
 
-    .sound-toggle {
-        top: calc(env(safe-area-inset-top) + 0.75rem);
-        right: 0.75rem;
-        width: 36px;
-        height: 36px;
-    }
-
-    .sound-icon {
-        width: 20px;
-        height: 20px;
+    #reset-btn {
+        margin-bottom: env(safe-area-inset-bottom);
+        font-size: min(0.9rem, 3.5vw);
     }
 }

@@ -66,7 +66,7 @@ body {
     width: 95%;
     max-width: 500px;
     margin: auto;
-    padding: 1.5rem 0.5rem;
+    padding: 1.5rem 0.5rem 1rem;
     background: white;
     border-radius: var(--border-radius);
     box-shadow: 0 8px 30px var(--shadow-color);
@@ -211,8 +211,8 @@ h1 {
     user-select: none;
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
-    margin: 0.5rem 0;
-    padding: 2rem 0;
+    margin: 0.25rem 0;
+    padding: 1.5rem 0;
 }
 
 .tap-hint {
@@ -237,8 +237,8 @@ h1 {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 0; /* Remove margin to use grid gap */
-    padding-bottom: 1rem;
+    margin: 0.5rem 0;
+    padding-bottom: 0;
 }
 
 #reset-btn {
@@ -339,14 +339,15 @@ h1 {
         height: 100vh;
         max-height: 100vh;
         border-radius: 0;
-        padding: 1rem 0.5rem;
+        padding: calc(env(safe-area-inset-top) + 1rem) 0.5rem calc(env(safe-area-inset-bottom) + 0.5rem);
         gap: 0.5rem;
         margin: 0;
     }
 
     h1 {
         font-size: 1.25rem;
-        margin-bottom: 0.25rem;
+        margin: 0.5rem 0;
+        padding-top: env(safe-area-inset-top);
     }
 
     .mode-selector {
@@ -384,13 +385,14 @@ h1 {
     }
 
     #tap-zone {
-        padding: 1.5rem 0;
+        padding: 1rem 0;
         margin: 0.25rem 0;
-        min-height: 100px;
+        min-height: 120px;
     }
 
     .controls {
-        padding-bottom: 0.5rem;
+        margin: 0.75rem 0;
+        padding-bottom: env(safe-area-inset-bottom);
     }
 
     #reset-btn {
@@ -409,7 +411,7 @@ h1 {
     }
 
     .sound-toggle {
-        top: 0.75rem;
+        top: calc(env(safe-area-inset-top) + 0.75rem);
         right: 0.75rem;
         width: 36px;
         height: 36px;
